@@ -1,125 +1,99 @@
-# Ex.No: 6  Implementation of Steering behaviour-Pursue and Evade in Unity
-### DATE:                                                                           
+# Experiment 6: Implementing Jumping Behavior in Unity 
 ### REGISTER NUMBER : 212223230237
 ### AIM: 
-To write a program to simulate the process of Pursue and Evade behavior in Unity using NavigationMeshAgent. 
+To implement a jumping behavior for a player-controlled character in Unity using Rigidbody physics and user input, where pressing the spacebar while in the air causes the player to move down. 
 ### Algorithm:
-1. Create a New Unity Project by Open the  Unity Hub and create a new 3D Project.
-2. Name the project "SteeringBehaviors" and select a location. Click Create.
-3.Open Unity Scene (default is SampleScene).
-  In the Hierarchy, create a Plane:
-  Right-click → 3D Object → Plane (this will be the ground).
-  Set its Scale to (10, 1, 10) for a larger surface.
-  Create three Capsule for the Player, Pursuer, and Evader:
-  Rename them to "Player", "Pursuer", and "Evader".
-  Set their Y Position to 0.5 (so they sit on the ground).
-  Change their Material for better distinction (optional).
-3. Add NavMesh and Bake
-   Window → AI → Navigation (opens the Navigation tab).
-   Select the Plane, go to the Navigation tab, and mark it as Navigation Static.
-   Go to the Bake tab and click Bake.
-   or
-   Add navMeshSurface to plane and bake 
-4. Add NavMeshAgent Component
-    Select Pursuer, and Evader.
-    Click Add Component → Search for NavMeshAgent and add it.
-    Adjust NavMeshAgent Settings:
-    Player: Set Speed = 5.
-    Pursuer: Set Speed = 4.
-    Evader: Set Speed = 6.
-5. Write a script for  Player_movement behavior and save it
-6. Write script for Pursuer and Evader.
-7. Attach the Script to each player,pursuer and Evader.
-   Drag & Drop the Target from the Hierarchy into the "Target" field in the script component ( For pursuer and Evader).
-12. Run the game 
-13. Stop the program
-
-### Program:
-#### Player Script:
 ```
-using System.Collections;
-using System.Collections.Generic;
+1. **Create a New Unity Project**  
+   - Open **Unity Hub** → Click **New Project**  
+   - Select **3D Template** → Name the project **JumpingBehavior** → Click **Create**  
+
+2. **Set Up the Scene**  
+   - **Create Ground:**  
+     - Go to **GameObject → 3D Object → Plane**  
+     - Rename it `"Ground"`  
+     - Scale it to **(10,1,10)** (or as needed)  
+     - Set **Position** to `(0, 0, 0)`  
+
+3. **Create the Player Object**  
+   - **Create a Capsule to Represent the Player:**  
+     - Go to **GameObject → 3D Object → Capsule**  
+     - Rename it `"Player"`  
+     - Scale it to **(1,2,1)** (default is fine)  
+     - Set **Position** to `(0, 1, 0)`  
+
+4. **Add Rigidbody to the Player**  
+   - Select **Player**  
+   - Go to **Inspector → Add Component → Rigidbody**  
+   - Set the **Constraints**:  
+     - Freeze **Rotation X**, **Rotation Z** (to prevent falling over)  
+
+5. **Create the Jumping Script**  
+   - Go to **Assets → Right Click → Create → C# Script**  
+   - Rename it `"Jump.cs"`  
+   - Open the script and add the following code:  
+
+6. **Attach the Script to the Player**  
+   - Select **Player**  
+   - Drag & Drop **Jump.cs** onto it  
+
+7. **Assign the Ground Tag**  
+   - Select **Ground**  
+   - In **Inspector**, go to **Tag → Add Tag... → Click "+" → Type "Ground" → Save**  
+   - Select **Ground** again and assign the `"Ground"` tag  
+
+8. **Run the Program**  
+   - Press **Play**  
+   - Press **Spacebar** to make the player jump, and if pressed while in the air, the player will fall down  
+```  
+### Program:
+```
 using UnityEngine;
 
-public class Player_movement : MonoBehaviour
-{
-    // Start is called before the first frame update
-    public float speed;
-    void Start()
-    {
-        float xdir = Input.GetAxis("horizontal") * speed;
-        float zdir = Input.GetAxis("vertical") * speed;
-        transform.position=new Vector3(xdir,zdir);
-    }
+   public class Jump : MonoBehaviour
+   {
+       public float jumpForce = 5f;
+       private bool isGrounded;
+       private Rigidbody rb;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-}
-```
-#### Evader Script:
-```
-public class Evader : MonoBehaviour
-{
-    // Start is called before the first frame update
-    public NavMeshAgent agent;
-    public Transform target;
-    public float evadespeed;
-    void Start()
-    {
-        agent= GetComponent<NavMeshAgent>();
-    }
+       void Start()
+       {
+           rb = GetComponent<Rigidbody>();
+       }
 
-    void evade()
-    {
-        Vector3 fleedir = transform.position - target.position;
-        Vector3 evadeposition = transform.position + fleedir.normalized * evadespeed;
-        agent.SetDestination(evadeposition);
+       void Update()
+       {
+           if (isGrounded && Input.GetKeyDown(KeyCode.Space))
+           {
+               rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+               isGrounded = false;
+           }
+       }
 
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        evade();          
-     }
-}
-
+       private void OnCollisionEnter(Collision collision)
+       {
+           if (collision.gameObject.CompareTag("Ground"))
+           {
+               isGrounded = true;
+           }
+       }
+   }
 ```
 
-#### Pursuer Script:
-```
-public class Pursuer: MonoBehaviour
-{
-    // Start is called before the first frame update
-    NavMeshAgent agent;
-    public Transform target;
-    public float speed;
-    void Start()
-    {
-        agent=this.GetComponent<NavMeshAgent>();
-    }
-       // Update is called once per frame
-    void pursue()
-    {
-       Vector3 targetvelocity=target.position-transform.position;
-       Vector3 futurepos = transform.position + targetvelocity.normalized*speed;
-       agent.SetDestination(target.position);
-    } 
-    // Update is called once per frame
-    void Update()
-    {
-        pursue();          
-     }
-}
-
-```
 ### Output:
 
-![image](https://github.com/user-attachments/assets/cbb2754b-5957-4e47-9212-fcff79c07c7c)
+## Initially player in air:
+<img width="850" alt="image" src="https://github.com/user-attachments/assets/7a669489-0f94-4e03-a42c-16db1298e719" />
+
+## After player jumped:
+<img width="850" alt="image" src="https://github.com/user-attachments/assets/3c43b7e2-e1c4-4e34-822c-ad2aff291b84" />
+
+
+
+
+
 
 
 
 ### Result:
-Thus the simple pursue and evade behavior was implemented successfully.
+Thus the simple seek behavior was implemented successfully.
